@@ -1,3 +1,272 @@
+import React, { useState, useEffect } from 'react';
+import { Menu, X, MapPin, Phone, Clock, Star, Filter, Globe, Facebook, Instagram, Twitter, MessageCircle } from 'lucide-react';
+
+const NatureVillageWebsite = () => {
+  const [currentSection, setCurrentSection] = useState('home');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [language, setLanguage] = useState('en');
+  const [activeFilter, setActiveFilter] = useState('all');
+
+  // Language options
+  const languages = {
+    en: { name: 'English', code: 'en', dir: 'ltr' },
+    ku: { name: 'کوردی', code: 'ku', dir: 'rtl' },
+    ar: { name: 'العربية', code: 'ar', dir: 'rtl' }
+  };
+
+  // Kurdish pattern SVG for decorative elements
+  const KurdishPattern = () => (
+    <svg className="absolute opacity-10" width="200" height="200" viewBox="0 0 200 200">
+      <defs>
+        <pattern id="kurdishPattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+          <rect width="50" height="50" fill="#8B4513"/>
+          <polygon points="25,5 45,25 25,45 5,25" fill="#D2B48C"/>
+          <circle cx="25" cy="25" r="8" fill="#6B8E23"/>
+        </pattern>
+      </defs>
+      <rect width="200" height="200" fill="url(#kurdishPattern)"/>
+    </svg>
+  );
+
+  // Sample menu data with MenuIQ integration placeholder
+  const menuItems = [
+    {
+      id: 1,
+      name: {
+        en: 'Kebab-e Kubideh',
+        ku: 'کەباب کوبیده',
+        ar: 'كباب كوبيده'
+      },
+      description: {
+        en: 'Traditional ground lamb kebab with aromatic spices, served with basmati rice and grilled tomatoes',
+        ku: 'کەبابی نەریتی لە گۆشتی بەرخی هاڕاو لەگەڵ بۆنوبێرینی جۆراوجۆر، لەگەڵ برنجی باسماتی و تەماتەی برژاو',
+        ar: 'كباب لحم الخروف المفروم التقليدي مع التوابل العطرة، يُقدم مع أرز البسمتي والطماطم المشوية'
+      },
+      price: '$18.99',
+      category: 'traditional',
+      popular: true,
+      image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&h=200&fit=crop',
+      tags: ['spicy', 'grilled']
+    },
+    {
+      id: 2,
+      name: {
+        en: 'Dolma',
+        ku: 'دۆڵمە',
+        ar: 'دولمة'
+      },
+      description: {
+        en: 'Grape leaves stuffed with rice, herbs, and spices - a Kurdish family recipe',
+        ku: 'گەڵای مێو پڕکراو لە برنج و ڕووەک و بۆنوبێرین - ڕیسەتی خێزانی کوردی',
+        ar: 'أوراق العنب محشوة بالأرز والأعشاب والتوابل - وصفة عائلية كردية'
+      },
+      price: '$14.99',
+      category: 'vegan',
+      popular: false,
+      image: 'https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=300&h=200&fit=crop',
+      tags: ['vegetarian', 'traditional']
+    },
+    {
+      id: 3,
+      name: {
+        en: 'Yaprakh',
+        ku: 'یاپراخ',
+        ar: 'يبرق'
+      },
+      description: {
+        en: 'Cabbage rolls filled with rice, meat, and Kurdish spices in tomato sauce',
+        ku: 'لەتی کەلەرم پڕکراو لە برنج و گۆشت و بۆنوبێرینی کوردی لە سۆسی تەماتە',
+        ar: 'لفائف الملفوف محشوة بالأرز واللحم والتوابل الكردية في صلصة الطماطم'
+      },
+      price: '$16.99',
+      category: 'traditional',
+      popular: true,
+      image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=300&h=200&fit=crop',
+      tags: ['comfort food']
+    },
+    {
+      id: 4,
+      name: {
+        en: 'Ash-e Reshteh',
+        ku: 'ئاشی ڕەشتە',
+        ar: 'آش رشتة'
+      },
+      description: {
+        en: 'Hearty Kurdish noodle soup with beans, herbs, and yogurt',
+        ku: 'شۆربای ڕەشتەی کوردی لەگەڵ لۆبیا و ڕووەک و ماست',
+        ar: 'حساء الشعيرية الكردي المغذي مع الفاصولياء والأعشاب واللبن'
+      },
+      price: '$12.99',
+      category: 'soup',
+      popular: false,
+      image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=200&fit=crop',
+      tags: ['soup', 'comfort food']
+    },
+    {
+      id: 5,
+      name: {
+        en: 'Khorak-e Bademjan',
+        ku: 'خۆراکی بادەمجان',
+        ar: 'خوراك الباذنجان'
+      },
+      description: {
+        en: 'Slow-cooked eggplant stew with tomatoes and Kurdish herbs',
+        ku: 'خۆراکی بادەمجانی هێواش لێنراو لەگەڵ تەماتە و ڕووەکی کوردی',
+        ar: 'يخنة الباذنجان المطبوخة ببطء مع الطماطم والأعشاب الكردية'
+      },
+      price: '$15.99',
+      category: 'vegan',
+      popular: true,
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop',
+      tags: ['vegan', 'stew']
+    },
+    {
+      id: 6,
+      name: {
+        en: 'Baklava Kurdistan',
+        ku: 'بەقڵاوای کوردستان',
+        ar: 'بقلاوة كردستان'
+      },
+      description: {
+        en: 'Traditional Kurdish baklava with pistachios and rose water',
+        ku: 'بەقڵاوای نەریتی کوردی لەگەڵ فستق و ئاوی گوڵ',
+        ar: 'بقلاوة كردية تقليدية بالفستق وماء الورد'
+      },
+      price: '$8.99',
+      category: 'dessert',
+      popular: true,
+      image: 'https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=300&h=200&fit=crop',
+      tags: ['sweet', 'traditional']
+    }
+  ];
+
+  const translations = {
+    en: {
+      nav: {
+        home: 'Home',
+        menu: 'Menu',
+        about: 'About Us',
+        gallery: 'Gallery',
+        visit: 'Visit Us'
+      },
+      hero: {
+        title: 'Nature Village',
+        subtitle: 'A Taste of Kurdistan in Every Bite',
+        description: 'Experience authentic Kurdish flavors in a warm, traditional setting where every dish tells a story of our rich cultural heritage.',
+        cta1: 'View Menu',
+        cta2: 'Make Reservation'
+      },
+      menu: {
+        title: 'Our Menu',
+        subtitle: 'Powered by MenuIQ - AI-Enhanced Dining Experience',
+        filters: {
+          all: 'All Items',
+          traditional: 'Traditional',
+          vegan: 'Vegan & Vegetarian',
+          popular: 'Most Popular'
+        }
+      },
+      about: {
+        title: 'Our Story',
+        content: 'Nature Village was born from a dream to share the authentic flavors and warm hospitality of Kurdistan with the world. Our family recipes have been passed down through generations, each dish crafted with love and respect for our cultural traditions.',
+        experience: 'Years Experience',
+        recipes: 'Traditional Recipes'
+      },
+      gallery: {
+        title: 'Gallery',
+        subtitle: 'A visual journey through our culinary heritage'
+      },
+      visit: {
+        title: 'Visit Us',
+        subtitle: 'Find us in the heart of the city',
+        hours: 'Hours',
+        contact: 'Contact',
+        address: 'Address',
+        phone: 'Phone',
+        whatsapp: 'WhatsApp',
+        makeReservation: 'Make Reservation',
+        whatsappUs: 'WhatsApp Us'
+      },
+      footer: {
+        description: 'Bringing the authentic flavors and warm hospitality of Kurdistan to your table. Every dish is a celebration of our rich cultural heritage.',
+        quickLinks: 'Quick Links',
+        contactInfo: 'Contact Info',
+        openDaily: 'Open Daily 11:00 AM',
+        poweredBy: 'Powered by',
+        copyright: '© 2024 Nature Village Kurdish Restaurant. All rights reserved.'
+      },
+      featured: {
+        title: 'Featured Dishes',
+        subtitle: 'Discover our most beloved Kurdish specialties, crafted with traditional recipes and modern presentation'
+      }
+    },
+    ku: {
+      nav: {
+        home: 'ماڵەوە',
+        menu: 'خۆراک',
+        about: 'دەربارەمان',
+        gallery: 'وێنەکان',
+        visit: 'سەردانمان بکەن'
+      },
+      hero: {
+        title: 'گوندی سروشت',
+        subtitle: 'تامی کوردستان لە هەر پارووەکدا',
+        description: 'تامی ڕەسەنی کوردی بچێژن لە ژینگەیەکی گەرم و نەریتیدا کە هەر خۆراکێک چیرۆکی دەوڵەمەندی کولتووری میراتمان دەگێڕێتەوە.',
+        cta1: 'بینینی خۆراک',
+        cta2: 'جێگە حیجازکردن'
+      },
+      menu: {
+        title: 'خۆراکەکانمان',
+        subtitle: 'بە MenuIQ هێزدراو - ئەزموونی خۆراک لەگەڵ زیرەکی دەستکرد',
+        filters: {
+          all: 'هەموو ئایتەمەکان',
+          traditional: 'نەریتی',
+          vegan: 'ڕووەکی و ڤێگان',
+          popular: 'بەناوبانگترین'
+        }
+      },
+      about: {
+        title: 'چیرۆکەکەمان',
+        content: 'گوندی سروشت لە خەونێکەوە لەدایک بووە بۆ هاوبەشکردنی تامە ڕەسەنەکان و پێشوازی گەرمی کوردستان لەگەڵ جیهان. ڕیسەتەکانی خێزانەکەمان لە نەوەیەکەوە بۆ نەوەیەک دراونەتەوە، هەر خۆراکێک بە خۆشەویستی و ڕێزگرتن لە نەریتە کولتوورییەکانمان دروست دەکرێت.',
+        experience: 'ساڵ ئەزموون',
+        recipes: 'ڕیسەتی نەریتی'
+      },
+      gallery: {
+        title: 'گالەری',
+        subtitle: 'گەشتێکی بینایی بە میراتی چێشتلێنانمان'
+      },
+      visit: {
+        title: 'سەردانمان بکەن',
+        subtitle: 'لە دڵی شارەکە بمانبینەوە',
+        hours: 'کاتەکان',
+        contact: 'پەیوەندی',
+        address: 'ناونیشان',
+        phone: 'تەلەفۆن',
+        whatsapp: 'واتساپ',
+        makeReservation: 'جێگە حیجازکردن',
+        whatsappUs: 'واتساپمان بکە'
+      },
+      footer: {
+        description: 'هێنانی تامە ڕەسەنەکان و پێشوازی گەرمی کوردستان بۆ مێزەکەتان. هەر خۆراکێک ئاهەنگگێڕانی دەوڵەمەندی کولتووری میراتمانە.',
+        quickLinks: 'لینکە خێراکان',
+        contactInfo: 'زانیاری پەیوەندی',
+        openDaily: 'ڕۆژانە کراوەیە کاتژمێر ١١:٠٠ی بەیانی',
+        poweredBy: 'هێزی لەلایەن',
+        copyright: '© ٢٠٢٤ گوندی سروشت چێشتخانەی کوردی. هەموو مافەکان پارێزراون.'
+      },
+      featured: {
+        title: 'خۆراکی نمایشکراو',
+        subtitle: 'خۆراکە خۆشەویستەکانی کوردی بناسە، لەگەڵ ڕیسەتی نەریتی و پێشکەشکردنی نوێ دروستکراون'
+      }
+    },
+    ar: {
+      nav: {
+        home: 'الرئيسية',
+        menu: 'القائمة',
+        about: 'من نحن',
+        gallery: 'المعرض',
+        visit: 'زورونا'
+      },
       hero: {
         title: 'قرية الطبيعة',
         subtitle: 'طعم كردستان في كل قضمة',
@@ -306,14 +575,6 @@
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
                 {t.about.content}
               </p>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                {language === 'ar' 
-                  ? 'يقع مطعمنا في قلب المدينة، ويجمع بين دفء الضيافة الكردية وراحة الطعام المعاصر. كل مكون يتم اختياره بعناية، وكل طبق يُحضر بنفس العناية والاهتمام الذي ميز الطبخ الكردي لقرون.'
-                  : language === 'ku'
-                  ? 'چێشتخانەکەمان لە دڵی شارەکەدا جێگیرە، گەرمی میوانداری کوردی لەگەڵ ئاسوودەیی خواردنی سەردەمی تێکەڵ دەکات. هەر پێکهاتەیەک بە وردی هەڵدەبژێردرێت، هەر خۆراکێکیش بە هەمان گرنگیدان و سەرنجدان ئامادە دەکرێت کە بۆ سەدەکان تایبەتمەندی چێشتلێنانی کوردی بووە.'
-                  : 'Located in the heart of the city, our restaurant brings together the warmth of Kurdish hospitality with contemporary dining comfort. Every ingredient is carefully sourced, and every dish is prepared with the same care and attention that has defined Kurdish cooking for centuries.'
-                }
-              </p>
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center p-4 bg-amber-50 rounded-lg">
                   <div className="text-3xl font-bold text-amber-600 mb-2">15+</div>
@@ -575,274 +836,4 @@
   );
 };
 
-export default NatureVillageWebsite;import React, { useState, useEffect } from 'react';
-import { Menu, X, MapPin, Phone, Clock, Star, Filter, Globe, Facebook, Instagram, Twitter, MessageCircle } from 'lucide-react';
-
-const NatureVillageWebsite = () => {
-  const [currentSection, setCurrentSection] = useState('home');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [language, setLanguage] = useState('en');
-  const [activeFilter, setActiveFilter] = useState('all');
-
-  // Language options
-  const languages = {
-    en: { name: 'English', code: 'en', dir: 'ltr' },
-    ku: { name: 'کوردی', code: 'ku', dir: 'rtl' },
-    ar: { name: 'العربية', code: 'ar', dir: 'rtl' }
-  };
-
-  // Kurdish pattern SVG for decorative elements
-  const KurdishPattern = () => (
-    <svg className="absolute opacity-10" width="200" height="200" viewBox="0 0 200 200">
-      <defs>
-        <pattern id="kurdishPattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
-          <rect width="50" height="50" fill="#8B4513"/>
-          <polygon points="25,5 45,25 25,45 5,25" fill="#D2B48C"/>
-          <circle cx="25" cy="25" r="8" fill="#6B8E23"/>
-        </pattern>
-      </defs>
-      <rect width="200" height="200" fill="url(#kurdishPattern)"/>
-    </svg>
-  );
-
-  // Sample menu data with MenuIQ integration placeholder
-  const menuItems = [
-    {
-      id: 1,
-      name: {
-        en: 'Kebab-e Kubideh',
-        ku: 'کەباب کوبیده',
-        ar: 'كباب كوبيده'
-      },
-      description: {
-        en: 'Traditional ground lamb kebab with aromatic spices, served with basmati rice and grilled tomatoes',
-        ku: 'کەبابی نەریتی لە گۆشتی بەرخی هاڕاو لەگەڵ بۆنوبێرینی جۆراوجۆر، لەگەڵ برنجی باسماتی و تەماتەی برژاو',
-        ar: 'كباب لحم الخروف المفروم التقليدي مع التوابل العطرة، يُقدم مع أرز البسمتي والطماطم المشوية'
-      },
-      price: '$18.99',
-      category: 'traditional',
-      popular: true,
-      image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&h=200&fit=crop',
-      tags: ['spicy', 'grilled']
-    },
-    {
-      id: 2,
-      name: {
-        en: 'Dolma',
-        ku: 'دۆڵمە',
-        ar: 'دولمة'
-      },
-      description: {
-        en: 'Grape leaves stuffed with rice, herbs, and spices - a Kurdish family recipe',
-        ku: 'گەڵای مێو پڕکراو لە برنج و ڕووەک و بۆنوبێرین - ڕیسەتی خێزانی کوردی',
-        ar: 'أوراق العنب محشوة بالأرز والأعشاب والتوابل - وصفة عائلية كردية'
-      },
-      price: '$14.99',
-      category: 'vegan',
-      popular: false,
-      image: 'https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=300&h=200&fit=crop',
-      tags: ['vegetarian', 'traditional']
-    },
-    {
-      id: 3,
-      name: {
-        en: 'Yaprakh',
-        ku: 'یاپراخ',
-        ar: 'يبرق'
-      },
-      description: {
-        en: 'Cabbage rolls filled with rice, meat, and Kurdish spices in tomato sauce',
-        ku: 'لەتی کەلەرم پڕکراو لە برنج و گۆشت و بۆنوبێرینی کوردی لە سۆسی تەماتە',
-        ar: 'لفائف الملفوف محشوة بالأرز واللحم والتوابل الكردية في صلصة الطماطم'
-      },
-      price: '$16.99',
-      category: 'traditional',
-      popular: true,
-      image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=300&h=200&fit=crop',
-      tags: ['comfort food']
-    },
-    {
-      id: 4,
-      name: {
-        en: 'Ash-e Reshteh',
-        ku: 'ئاشی ڕەشتە',
-        ar: 'آش رشتة'
-      },
-      description: {
-        en: 'Hearty Kurdish noodle soup with beans, herbs, and yogurt',
-        ku: 'شۆربای ڕەشتەی کوردی لەگەڵ لۆبیا و ڕووەک و ماست',
-        ar: 'حساء الشعيرية الكردي المغذي مع الفاصولياء والأعشاب واللبن'
-      },
-      price: '$12.99',
-      category: 'soup',
-      popular: false,
-      image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=200&fit=crop',
-      tags: ['soup', 'comfort food']
-    },
-    {
-      id: 5,
-      name: {
-        en: 'Khorak-e Bademjan',
-        ku: 'خۆراکی بادەمجان',
-        ar: 'خوراك الباذنجان'
-      },
-      description: {
-        en: 'Slow-cooked eggplant stew with tomatoes and Kurdish herbs',
-        ku: 'خۆراکی بادەمجانی هێواش لێنراو لەگەڵ تەماتە و ڕووەکی کوردی',
-        ar: 'يخنة الباذنجان المطبوخة ببطء مع الطماطم والأعشاب الكردية'
-      },
-      price: '$15.99',
-      category: 'vegan',
-      popular: true,
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop',
-      tags: ['vegan', 'stew']
-    },
-    {
-      id: 6,
-      name: {
-        en: 'Baklava Kurdistan',
-        ku: 'بەقڵاوای کوردستان',
-        ar: 'بقلاوة كردستان'
-      },
-      description: {
-        en: 'Traditional Kurdish baklava with pistachios and rose water',
-        ku: 'بەقڵاوای نەریتی کوردی لەگەڵ فستق و ئاوی گوڵ',
-        ar: 'بقلاوة كردية تقليدية بالفستق وماء الورد'
-      },
-      price: '$8.99',
-      category: 'dessert',
-      popular: true,
-      image: 'https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=300&h=200&fit=crop',
-      tags: ['sweet', 'traditional']
-    }
-  ];
-
-  const translations = {
-    en: {
-      nav: {
-        home: 'Home',
-        menu: 'Menu',
-        about: 'About Us',
-        gallery: 'Gallery',
-        visit: 'Visit Us'
-      },
-      hero: {
-        title: 'Nature Village',
-        subtitle: 'A Taste of Kurdistan in Every Bite',
-        description: 'Experience authentic Kurdish flavors in a warm, traditional setting where every dish tells a story of our rich cultural heritage.',
-        cta1: 'View Menu',
-        cta2: 'Make Reservation'
-      },
-      menu: {
-        title: 'Our Menu',
-        subtitle: 'Powered by MenuIQ - AI-Enhanced Dining Experience',
-        filters: {
-          all: 'All Items',
-          traditional: 'Traditional',
-          vegan: 'Vegan & Vegetarian',
-          popular: 'Most Popular'
-        }
-      },
-      about: {
-        title: 'Our Story',
-        content: 'Nature Village was born from a dream to share the authentic flavors and warm hospitality of Kurdistan with the world. Our family recipes have been passed down through generations, each dish crafted with love and respect for our cultural traditions.',
-        experience: 'Years Experience',
-        recipes: 'Traditional Recipes'
-      },
-      gallery: {
-        title: 'Gallery',
-        subtitle: 'A visual journey through our culinary heritage'
-      },
-      visit: {
-        title: 'Visit Us',
-        subtitle: 'Find us in the heart of the city',
-        hours: 'Hours',
-        contact: 'Contact',
-        address: 'Address',
-        phone: 'Phone',
-        whatsapp: 'WhatsApp',
-        makeReservation: 'Make Reservation',
-        whatsappUs: 'WhatsApp Us'
-      },
-      footer: {
-        description: 'Bringing the authentic flavors and warm hospitality of Kurdistan to your table. Every dish is a celebration of our rich cultural heritage.',
-        quickLinks: 'Quick Links',
-        contactInfo: 'Contact Info',
-        openDaily: 'Open Daily 11:00 AM',
-        poweredBy: 'Powered by',
-        copyright: '© 2024 Nature Village Kurdish Restaurant. All rights reserved.'
-      },
-      featured: {
-        title: 'Featured Dishes',
-        subtitle: 'Discover our most beloved Kurdish specialties, crafted with traditional recipes and modern presentation'
-      }
-    },
-    ku: {
-      nav: {
-        home: 'ماڵەوە',
-        menu: 'خۆراک',
-        about: 'دەربارەمان',
-        gallery: 'وێنەکان',
-        visit: 'سەردانمان بکەن'
-      },
-      hero: {
-        title: 'گوندی سروشت',
-        subtitle: 'تامی کوردستان لە هەر پارووەکدا',
-        description: 'تامی ڕەسەنی کوردی بچێژن لە ژینگەیەکی گەرم و نەریتیدا کە هەر خۆراکێک چیرۆکی دەوڵەمەندی کولتووری میراتمان دەگێڕێتەوە.',
-        cta1: 'بینینی خۆراک',
-        cta2: 'جێگە حیجازکردن'
-      },
-      menu: {
-        title: 'خۆراکەکانمان',
-        subtitle: 'بە MenuIQ هێزدراو - ئەزموونی خۆراک لەگەڵ زیرەکی دەستکرد',
-        filters: {
-          all: 'هەموو ئایتەمەکان',
-          traditional: 'نەریتی',
-          vegan: 'ڕووەکی و ڤێگان',
-          popular: 'بەناوبانگترین'
-        }
-      },
-      about: {
-        title: 'چیرۆکەکەمان',
-        content: 'گوندی سروشت لە خەونێکەوە لەدایک بووە بۆ هاوبەشکردنی تامە ڕەسەنەکان و پێشوازی گەرمی کوردستان لەگەڵ جیهان. ڕیسەتەکانی خێزانەکەمان لە نەوەیەکەوە بۆ نەوەیەک دراونەتەوە، هەر خۆراکێک بە خۆشەویستی و ڕێزگرتن لە نەریتە کولتوورییەکانمان دروست دەکرێت.',
-        experience: 'ساڵ ئەزموون',
-        recipes: 'ڕیسەتی نەریتی'
-      },
-      gallery: {
-        title: 'گالەری',
-        subtitle: 'گەشتێکی بینایی بە میراتی چێشتلێنانمان'
-      },
-      visit: {
-        title: 'سەردانمان بکەن',
-        subtitle: 'لە دڵی شارەکە بمانبینەوە',
-        hours: 'کاتەکان',
-        contact: 'پەیوەندی',
-        address: 'ناونیشان',
-        phone: 'تەلەفۆن',
-        whatsapp: 'واتساپ',
-        makeReservation: 'جێگە حیجازکردن',
-        whatsappUs: 'واتساپمان بکە'
-      },
-      footer: {
-        description: 'هێنانی تامە ڕەسەنەکان و پێشوازی گەرمی کوردستان بۆ مێزەکەتان. هەر خۆراکێک ئاهەنگگێڕانی دەوڵەمەندی کولتووری میراتمانە.',
-        quickLinks: 'لینکە خێراکان',
-        contactInfo: 'زانیاری پەیوەندی',
-        openDaily: 'ڕۆژانە کراوەیە کاتژمێر ١١:٠٠ی بەیانی',
-        poweredBy: 'هێزی لەلایەن',
-        copyright: '© ٢٠٢٤ گوندی سروشت چێشتخانەی کوردی. هەموو مافەکان پارێزراون.'
-      },
-      featured: {
-        title: 'خۆراکی نمایشکراو',
-        subtitle: 'خۆراکە خۆشەویستەکانی کوردی بناسە، لەگەڵ ڕیسەتی نەریتی و پێشکەشکردنی نوێ دروستکراون'
-      }
-    },
-    ar: {
-      nav: {
-        home: 'الرئيسية',
-        menu: 'القائمة',
-        about: 'من نحن',
-        gallery: 'المعرض',
-        visit: 'زورونا'
-      },
-      hero: {
-        title: 'قر
+export default NatureVillageWebsite;
